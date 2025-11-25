@@ -1,14 +1,97 @@
 # Local MCP Server
 
-A collection of Model Context Protocol (MCP) servers for database access, GitHub integration, and markdown conversion.
+A collection of Model Context Protocol (MCP) servers for database access, GitHub integration, and markdown conversion. Use with VS Code & GitHub Copilot for AI-powered development workflows.
+
+## 🚀 Quick Start with VS Code
+
+### 1. Install Prerequisites
+```bash
+# Clone the repository
+git clone https://github.com/majidraza1228/local-mcpserver.git
+cd local-mcpserver
+
+# Set up virtual environment
+python -m venv .venv
+source .venv/bin/activate  # On macOS/Linux
+# or .venv\Scripts\activate on Windows
+
+# Install dependencies
+pip install fastmcp sqlalchemy requests mcp
+```
+
+### 2. Configure VS Code
+
+Create `.vscode/settings.json` in your workspace:
+```json
+{
+  "github.copilot.chat.mcp.servers": {
+    "github-tools": {
+      "command": "/absolute/path/to/local-mcpserver/.venv/bin/python",
+      "args": ["/absolute/path/to/local-mcpserver/github_server/server.py"],
+      "env": {
+        "GITHUB_TOKEN": "${env:GITHUB_TOKEN}"
+      }
+    },
+    "database-tools": {
+      "command": "/absolute/path/to/local-mcpserver/.venv/bin/python",
+      "args": ["/absolute/path/to/local-mcpserver/db_server/server.py"],
+      "env": {
+        "DB_DSN": "sqlite+pysqlite:///./app.db",
+        "DB_READONLY": "1"
+      }
+    }
+  }
+}
+```
+
+### 3. Set GitHub Token
+```bash
+# Get token from https://github.com/settings/tokens
+export GITHUB_TOKEN=your_github_personal_access_token
+```
+
+### 4. Use with GitHub Copilot Chat
+
+Open Copilot Chat (⌘+Shift+I / Ctrl+Shift+I) and try:
+```
+@workspace List all branches in my repository
+
+@workspace Create a branch called feature/new-feature from master
+
+@workspace Create a PR from feature/new-feature to master
+```
+
+**[📖 Full VS Code Integration Guide](VSCODE_INTEGRATION.md)**
 
 ## Overview
 
 This repository contains three FastMCP servers that provide different functionalities through the MCP protocol:
 
 1. **Database Server** - Safe SQLite database access with read/write controls
-2. **GitHub Server** - GitHub API integration for repository information and operations
+2. **GitHub Server** - GitHub API integration for repository operations, PR creation, and branch management
 3. **Markitdown Server** - Document conversion to markdown format
+
+## Features
+
+### GitHub Server
+- ✅ Repository information and search
+- ✅ Issue listing and management
+- ✅ Branch creation and listing
+- ✅ File creation and updates
+- ✅ Pull request creation
+- ✅ Full GitHub API integration
+
+### Database Server
+- ✅ Safe SQLite access with read-only mode
+- ✅ Schema inspection
+- ✅ Table listing and preview
+- ✅ Parameterized SQL queries with safety controls
+
+### Use Cases
+- **Automate PR workflows** - Create branches, update files, and create PRs through chat
+- **Database exploration** - Query databases naturally with AI assistance
+- **Repository management** - Manage GitHub repositories through natural language
+- **Development automation** - Automate repetitive development tasks
 
 ## Prerequisites
 
