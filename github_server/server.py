@@ -88,5 +88,139 @@ def search_repos(query: str, limit: int = 10):
         ]
     }
 
+@app.tool(description="Create a new branch in a repository")
+def create_branch(owner: str, repo: str, branch_name: str, from_branch: str = "main"):
+    """Create a new branch from an existing branch."""
+    # Get the SHA of the source branch
+    url = f"https://api.github.com/repos/{owner}/{repo}/git/ref/heads/{from_branch}"
+    response = requests.get(url, headers=get_headers())
+    
+    if response.status_code != 200:
+        return {"error": f"Failed to get source branch: {response.status_code}", "message": response.text}
+    
+    sha = response.json()["object"]["sha"]
+    
+    # Create new branch
+    url = f"https://api.github.com/repos/{owner}/{repo}/git/refs"
+    data = {
+        "ref": f"refs/heads/{branch_name}",
+        "sha": sha
+    }
+    response = requests.post(url, headers=get_headers(), json=data)
+    
+    if response.status_code == 201:
+        return {
+            "success": True,
+            "branch": branch_name,
+            "sha": sha,
+            "message": f"Branch '{branch_name}' created successfully"
+        }
+    else:
+        return {"error": f"Failed to create branch: {response.status_code}", "message": response.text}
+
+@app.tool(description="Create or update a file in a repository")
+def create_or_update_file(owner: str, repo: str, path: str, content: str, message: str, branch: str, sha: str = None):
+    """Create or update a file in a repository. If sha is provided, it updates the file; otherwise creates new."""
+    url = f"https://api.github.com/repos/{owner}/{repo}/contents/{path}"
+    
+    # Encode content to base64
+    import base64
+    content_encoded = base64.b64encode(content.encode()).decode()
+    
+    data = {
+        "message": message,
+        "content": content_encoded,
+        "branch": branch
+    }
+    
+    if sha:
+        data["sha"] = sha
+    
+    response = requests.put(url, headers=get_headers(), json=data)
+    
+    if response.status_code in [200, 201]:
+        result = response.json()
+        return {
+            "success": True,
+            "path": path,
+            "sha": result["content"]["sha"],
+            "message": f"File '{path}' {'updated' if sha else 'created'} successfully"
+        }
+    else:
+        return {"error": f"Failed to create/update file: {response.status_code}", "message": response.text}
+
+@app.tool(description="Get file content from a repository")
+def get_file_content(owner: str, repo: str, path: str, branch: str = "main"):
+    """Get the content of a file from a repository."""
+    url = f"https://api.github.com/repos/{owner}/{repo}/contents/{path}"
+    params = {"ref": branch}
+    response = requests.get(url, headers=get_headers(), params=params)
+    
+    if response.status_code != 200:
+        return {"error": f"Failed to get file: {response.status_code}", "message": response.text}
+    
+    data = response.json()
+    
+    # Decode content from base64
+    import base64
+    content = base64.b64decode(data["content"]).decode()
+    
+    return {
+        "path": data["path"],
+        "sha": data["sha"],
+        "content": content,
+        "size": data["size"]
+    }
+
+@app.tool(description="Create a pull request")
+def create_pull_request(owner: str, repo: str, title: str, head: str, base: str = "main", body: str = ""):
+    """Create a pull request from head branch to base branch."""
+    url = f"https://api.github.com/repos/{owner}/{repo}/pulls"
+    data = {
+        "title": title,
+        "head": head,
+        "base": base,
+        "body": body
+    }
+    
+    response = requests.post(url, headers=get_headers(), json=data)
+    
+    if response.status_code == 201:
+        pr = response.json()
+        return {
+            "success": True,
+            "number": pr["number"],
+            "title": pr["title"],
+            "url": pr["html_url"],
+            "state": pr["state"],
+            "created_at": pr["created_at"]
+        }
+    else:
+        return {"error": f"Failed to create PR: {response.status_code}", "message": response.text}
+
+@app.tool(description="List branches in a repository")
+def list_branches(owner: str, repo: str, limit: int = 30):
+    """List branches in a repository."""
+    limit = max(1, min(limit, 100))
+    url = f"https://api.github.com/repos/{owner}/{repo}/branches"
+    params = {"per_page": limit}
+    response = requests.get(url, headers=get_headers(), params=params)
+    
+    if response.status_code != 200:
+        return {"error": f"Failed to list branches: {response.status_code}"}
+    
+    branches = response.json()
+    return {
+        "count": len(branches),
+        "branches": [
+            {
+                "name": branch["name"],
+                "sha": branch["commit"]["sha"],
+                "protected": branch.get("protected", False)
+            }
+            for branch in branches
+        ]
+    }
+
 if __name__ == "__main__":
     app.run()

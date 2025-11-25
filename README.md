@@ -107,6 +107,11 @@ Integrates with GitHub API to provide repository information and operations.
 - `get_repo_info(owner, repo)` - Get detailed information about a repository
 - `list_issues(owner, repo, state, limit)` - List issues from a repository
 - `search_repos(query, limit)` - Search GitHub repositories
+- `create_branch(owner, repo, branch_name, from_branch)` - Create a new branch
+- `create_or_update_file(owner, repo, path, content, message, branch, sha)` - Create or update files
+- `get_file_content(owner, repo, path, branch)` - Get file content from repository
+- `create_pull_request(owner, repo, title, head, base, body)` - Create a pull request
+- `list_branches(owner, repo, limit)` - List all branches in a repository
 
 #### Usage
 ```bash
@@ -119,13 +124,50 @@ python github_server/server.py
 #### Example Queries
 ```python
 # Get repository info
-get_repo_info(owner="fastmcp", repo="fastmcp")
+get_repo_info(owner="majidraza1228", repo="local-mcpserver")
 
 # List open issues
-list_issues(owner="fastmcp", repo="fastmcp", state="open", limit=20)
+list_issues(owner="majidraza1228", repo="local-mcpserver", state="open", limit=20)
 
 # Search repositories
 search_repos(query="machine learning python", limit=10)
+
+# Create a new branch
+create_branch(owner="majidraza1228", repo="local-mcpserver", branch_name="feature/new-feature", from_branch="master")
+
+# Create or update a file
+create_or_update_file(
+    owner="majidraza1228",
+    repo="local-mcpserver",
+    path="README.md",
+    content="# Updated content",
+    message="Update README",
+    branch="feature/new-feature"
+)
+
+# Create a pull request
+create_pull_request(
+    owner="majidraza1228",
+    repo="local-mcpserver",
+    title="Add new feature",
+    head="feature/new-feature",
+    base="master",
+    body="Description of changes"
+)
+```
+
+#### Complete PR Creation Example
+
+See `example_create_pr.py` for a full workflow example that:
+1. Lists existing branches
+2. Creates a new feature branch
+3. Adds/updates files in the branch
+4. Creates a pull request
+
+Run it with:
+```bash
+export GITHUB_TOKEN=your_token
+python example_create_pr.py
 ```
 
 ### 3. Markitdown Server (`markitdown_server/server.py`)
@@ -174,6 +216,19 @@ python3 ./github_server/server.py
 ```
 
 **Note:** Servers run in STDIO mode and wait for MCP protocol messages. They won't show output until they receive input from an MCP client.
+
+## Using with VS Code & GitHub Copilot (Like Copilot Chat)
+
+To use these servers with VS Code and GitHub Copilot for natural language interactions, see the detailed integration guide:
+
+**[📖 VS Code & GitHub Copilot Integration Guide](VSCODE_INTEGRATION.md)**
+
+This enables you to use GitHub Copilot Chat to:
+- Create branches and PRs
+- Update files in your repository  
+- Query your database
+- Search repositories
+- And more - all through natural conversation!
 
 ## Testing the Servers
 
@@ -298,6 +353,7 @@ local-mcpserver/
 │   └── server.py              # Markitdown conversion server
 ├── test_github_server.py      # GitHub API unit tests
 ├── test_mcp_client.py         # MCP integration tests
+├── example_create_pr.py       # Example: Create PR workflow
 ├── .env                       # Environment variables (not in git)
 ├── .gitignore                 # Git ignore file
 ├── Pipfile                    # Python dependencies (pipenv)
