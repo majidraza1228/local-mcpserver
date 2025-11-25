@@ -47,8 +47,16 @@ Create `.vscode/settings.json` in your workspace:
 ### 3. Set GitHub Token
 ```bash
 # Get token from https://github.com/settings/tokens
+# IMPORTANT: Use a token from the account that owns the repositories you want to access
+# If working with majidraza1228 repos, generate token from majidraza1228 account
 export GITHUB_TOKEN=your_github_personal_access_token
 ```
+
+**Token Requirements:**
+- Generate token from the GitHub account that **owns** or has **access** to your repositories
+- Required scopes: `repo`, `workflow`, `read:org`
+- If using collaborator access, ensure the account has been added as a collaborator with write permissions
+- For organization repos, authorize the token for the organization at https://github.com/settings/tokens
 
 ### 4. Use with GitHub Copilot Chat
 
@@ -451,6 +459,38 @@ local-mcpserver/
 - **requests** - HTTP library for GitHub API calls
 
 ## Security Considerations
+
+### GitHub Token Access
+
+**Important:** Your GitHub token must belong to an account that has access to the repositories you want to manage.
+
+#### Scenario 1: Using Your Own Repositories
+If you're accessing repositories owned by your account (e.g., `majidraza1228/local-mcpserver`):
+- ✅ Generate token from **your account** (majidraza1228)
+- ✅ Token will have full access to your repositories
+- ✅ Recommended approach for managing your own repos
+
+#### Scenario 2: Using Collaborator Access
+If you're using a token from account `xyz` to access `majidraza1228` repositories:
+- ⚠️ Account `xyz` must be added as a collaborator on the target repository
+- ⚠️ Repository owner (majidraza1228) must grant write/admin permissions
+- ⚠️ Go to: `https://github.com/majidraza1228/local-mcpserver/settings/access`
+- ⚠️ Add `xyz` with appropriate permissions
+
+#### Scenario 3: Organization Repositories
+If working with organization repositories:
+- 🔐 Token must have `read:org` scope
+- 🔐 Authorize token for organization at: https://github.com/settings/tokens
+- 🔐 Click "Grant" next to the organization name
+- 🔐 Verify user is a member of the organization
+
+**Testing Token Access:**
+```bash
+export GITHUB_TOKEN=your_token
+python test_github_server.py
+```
+
+If you see 404 errors, the token doesn't have access to those repositories.
 
 ### Database Server
 - Read-only mode is enabled by default (`DB_READONLY=1`)
