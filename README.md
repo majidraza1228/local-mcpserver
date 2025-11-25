@@ -53,13 +53,15 @@ DB_DSN=sqlite+pysqlite:///./app.db
 DB_READONLY=1
 DB_MAX_ROWS=1000
 
-# GitHub Configuration
-GITHUB_TOKEN=your_github_token_here
+# GitHub Configuration (get your token from https://github.com/settings/tokens)
+GITHUB_TOKEN=your_github_personal_access_token
 ```
 
-Load environment variables:
+**Note:** Never commit your `.env` file to git. It's already included in `.gitignore`.
+
+Load environment variables (bash/zsh):
 ```bash
-export $(grep -v '^#' .env | xargs)
+export GITHUB_TOKEN=your_github_personal_access_token
 ```
 
 ## Servers
@@ -139,17 +141,123 @@ python markitdown_server/server.py
 
 Each server runs independently using the STDIO transport protocol for MCP communication.
 
-### Basic Usage
+### Prerequisites
+- Ensure virtual environment is activated
+- Set required environment variables (especially `GITHUB_TOKEN` for GitHub server)
+
+### Running Locally
+
+#### Database Server
+```bash
+# Using full path to venv python
+/path/to/local-mcpserver/.venv/bin/python ./db_server/server.py
+
+# Or if venv is activated
+python3 ./db_server/server.py
+```
+
+#### GitHub Server
+```bash
+# Set GitHub token first
+export GITHUB_TOKEN=your_github_personal_access_token
+
+# Run the server
+/path/to/local-mcpserver/.venv/bin/python ./github_server/server.py
+
+# Or if venv is activated
+python3 ./github_server/server.py
+```
+
+#### Markitdown Server
+```bash
+/path/to/local-mcpserver/.venv/bin/python ./markitdown_server/server.py
+```
+
+**Note:** Servers run in STDIO mode and wait for MCP protocol messages. They won't show output until they receive input from an MCP client.
+
+## Testing the Servers
+
+### Option 1: Unit Tests (GitHub API Direct Testing)
+
+Test the GitHub API functionality without MCP:
 
 ```bash
-# Activate virtual environment
-source .venv/bin/activate  # or pipenv shell
-
-# Run a specific server
-python db_server/server.py
-python github_server/server.py
-python markitdown_server/server.py
+# Run the API test script
+python test_github_server.py
 ```
+
+This will test:
+- GitHub API authentication and rate limits
+- Repository information retrieval
+- Issue listing
+- Repository search
+
+Expected output:
+```
+============================================================
+GitHub Server Functionality Test
+============================================================
+
+Checking GitHub API rate limit...
+✓ Rate Limit: 4999/5000
+  Authenticated: Yes
+
+Testing get_repo_info...
+✓ Repository: majidraza1228/local-mcpserver
+  Description: Local MCP servers for database and GitHub integration
+```
+
+### Option 2: MCP Client Test (Full Integration Testing)
+
+Test the server through the MCP protocol:
+
+```bash
+# Install MCP client library (if not already installed)
+pip install mcp
+
+# Run the MCP client test
+python test_mcp_client.py
+```
+
+This will:
+1. Start the GitHub server as a subprocess
+2. Connect via MCP protocol
+3. Test all available tools (get_repo_info, list_issues, search_repos)
+4. Display results and verify functionality
+
+Expected output:
+```
+============================================================
+Connected to GitHub MCP Server
+============================================================
+
+Available tools: 3
+  - get_repo_info: Get information about a GitHub repository
+  - list_issues: List recent issues for a GitHub repository
+  - search_repos: Search GitHub repositories
+
+Test 1: Getting repository info...
+Result: {
+  "name": "local-mcpserver",
+  "full_name": "majidraza1228/local-mcpserver",
+  ...
+}
+```
+
+### Option 3: MCP Inspector (Interactive Testing)
+
+Use the official MCP Inspector for interactive testing:
+
+```bash
+npx @modelcontextprotocol/inspector \
+  /path/to/local-mcpserver/.venv/bin/python \
+  /path/to/local-mcpserver/github_server/server.py
+```
+
+This opens a web interface where you can:
+- View all available tools and resources
+- Test tools interactively with custom parameters
+- See real-time request/response logs
 
 ### Using with MCP Clients
 
@@ -160,7 +268,7 @@ Example client configuration (for Claude Desktop or similar):
 {
   "mcpServers": {
     "database": {
-      "command": "python",
+      "command": "/path/to/local-mcpserver/.venv/bin/python",
       "args": ["/path/to/local-mcpserver/db_server/server.py"],
       "env": {
         "DB_DSN": "sqlite+pysqlite:///./app.db",
@@ -168,10 +276,10 @@ Example client configuration (for Claude Desktop or similar):
       }
     },
     "github": {
-      "command": "python",
+      "command": "/path/to/local-mcpserver/.venv/bin/python",
       "args": ["/path/to/local-mcpserver/github_server/server.py"],
       "env": {
-        "GITHUB_TOKEN": "your_token_here"
+        "GITHUB_TOKEN": "your_github_personal_access_token"
       }
     }
   }
@@ -183,15 +291,18 @@ Example client configuration (for Claude Desktop or similar):
 ```
 local-mcpserver/
 ├── db_server/
-│   └── server.py           # Database MCP server
+│   └── server.py              # Database MCP server
 ├── github_server/
-│   └── server.py           # GitHub API MCP server
+│   └── server.py              # GitHub API MCP server
 ├── markitdown_server/
-│   └── server.py           # Markitdown conversion server
-├── .env                    # Environment variables (not in git)
-├── Pipfile                 # Python dependencies (pipenv)
-├── Pipfile.lock           # Locked dependencies
-└── README.md              # This file
+│   └── server.py              # Markitdown conversion server
+├── test_github_server.py      # GitHub API unit tests
+├── test_mcp_client.py         # MCP integration tests
+├── .env                       # Environment variables (not in git)
+├── .gitignore                 # Git ignore file
+├── Pipfile                    # Python dependencies (pipenv)
+├── Pipfile.lock              # Locked dependencies
+└── README.md                  # This file
 ```
 
 ## Dependencies
