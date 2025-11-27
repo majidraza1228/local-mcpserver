@@ -408,6 +408,30 @@ Integrate these servers with VS Code and use GitHub Copilot Chat for natural lan
 
 ## Testing the Servers
 
+### Quick MCP Test
+
+Run the automated test script:
+
+```bash
+./quick_test.sh
+```
+
+This verifies:
+- ✅ Python environment
+- ✅ FastMCP installation
+- ✅ MarkItDown installation
+- ✅ MCP configuration
+- ✅ Server file and MCP tools
+
+### Detailed MCP Testing
+
+See **[TESTING_MCP.md](TESTING_MCP.md)** for comprehensive testing guide including:
+
+1. **MCP Inspector** - Interactive tool testing with web UI
+2. **VS Code Copilot Chat** - Real AI assistant integration
+3. **Manual Protocol Testing** - Low-level MCP verification
+4. **Test Files** - Sample documents for conversion testing
+
 ### Option 1: Manual Testing
 
 Test the servers manually by running them:
