@@ -1,6 +1,6 @@
 # Local MCP Server
 
-A collection of Model Context Protocol (MCP) servers for database access, GitHub integration, and markdown conversion. Use with VS Code & GitHub Copilot for AI-powered development workflows.
+A collection of Model Context Protocol (MCP) servers for database access and document conversion to Markdown. Use with VS Code & GitHub Copilot for AI-powered development workflows.
 
 ## 🚀 Quick Start with VS Code
 
@@ -16,7 +16,7 @@ source .venv/bin/activate  # On macOS/Linux
 # or .venv\Scripts\activate on Windows
 
 # Install dependencies
-pip install fastmcp sqlalchemy requests mcp
+pip install fastmcp sqlalchemy markitdown mcp
 ```
 
 ### 2. Configure VS Code
@@ -25,12 +25,9 @@ Create `.vscode/settings.json` in your workspace:
 ```json
 {
   "github.copilot.chat.mcp.servers": {
-    "github-tools": {
+    "markitdown": {
       "command": "/absolute/path/to/local-mcpserver/.venv/bin/python",
-      "args": ["/absolute/path/to/local-mcpserver/github_server/server.py"],
-      "env": {
-        "GITHUB_TOKEN": "${env:GITHUB_TOKEN}"
-      }
+      "args": ["/absolute/path/to/local-mcpserver/markitdown_server/server.py"]
     },
     "database-tools": {
       "command": "/absolute/path/to/local-mcpserver/.venv/bin/python",
@@ -44,50 +41,33 @@ Create `.vscode/settings.json` in your workspace:
 }
 ```
 
-### 3. Set GitHub Token
-```bash
-# Get token from https://github.com/settings/tokens
-# IMPORTANT: Use a token from the account that owns the repositories you want to access
-# If working with majidraza1228 repos, generate token from majidraza1228 account
-export GITHUB_TOKEN=your_github_personal_access_token
-```
-
-**Token Requirements:**
-- Generate token from the GitHub account that **owns** or has **access** to your repositories
-- Required scopes: `repo`, `workflow`, `read:org`
-- If using collaborator access, ensure the account has been added as a collaborator with write permissions
-- For organization repos, authorize the token for the organization at https://github.com/settings/tokens
-
-### 4. Use with GitHub Copilot Chat
+### 3. Use with GitHub Copilot Chat
 
 Open Copilot Chat (⌘+Shift+I / Ctrl+Shift+I) and try:
 ```
-@workspace List all branches in my repository
+@workspace Convert this PDF file to markdown: /path/to/document.pdf
 
-@workspace Create a branch called feature/new-feature from master
+@workspace Convert this webpage to markdown: https://example.com
 
-@workspace Create a PR from feature/new-feature to master
+@workspace What file formats can you convert to markdown?
 ```
-
-**[📖 Full VS Code Integration Guide](VSCODE_INTEGRATION.md)**
 
 ## Overview
 
-This repository contains three FastMCP servers that provide different functionalities through the MCP protocol:
+This repository contains two FastMCP servers that provide different functionalities through the MCP protocol:
 
-1. **Database Server** - Safe SQLite database access with read/write controls
-2. **GitHub Server** - GitHub API integration for repository operations, PR creation, and branch management
-3. **Markitdown Server** - Document conversion to markdown format
+1. **Markitdown Server** - Convert documents and web pages to Markdown format
+2. **Database Server** - Safe SQLite database access with read/write controls
 
 ## Features
 
-### GitHub Server
-- ✅ Repository information and search
-- ✅ Issue listing and management
-- ✅ Branch creation and listing
-- ✅ File creation and updates
-- ✅ Pull request creation
-- ✅ Full GitHub API integration
+### Markitdown Server
+- ✅ **Document Conversion** - PDF, DOCX, XLSX, PPTX to Markdown
+- ✅ **Web Page Conversion** - Convert any URL to Markdown
+- ✅ **Image OCR** - Extract text from images (JPG, PNG)
+- ✅ **Audio Transcription** - Convert audio files to text
+- ✅ **Batch Processing** - Convert multiple files at once
+- ✅ **Comprehensive Format Support** - 12+ file formats supported
 
 ### Database Server
 - ✅ Safe SQLite access with read-only mode
@@ -96,10 +76,12 @@ This repository contains three FastMCP servers that provide different functional
 - ✅ Parameterized SQL queries with safety controls
 
 ### Use Cases
-- **Automate PR workflows** - Create branches, update files, and create PRs through chat
-- **Database exploration** - Query databases naturally with AI assistance
-- **Repository management** - Manage GitHub repositories through natural language
-- **Development automation** - Automate repetitive development tasks
+- **Document Processing** - Convert PDFs, Word docs, presentations to Markdown
+- **Web Scraping** - Extract clean text from web pages
+- **Database Exploration** - Query databases naturally with AI assistance
+- **Content Migration** - Batch convert documents for content management systems
+- **OCR Processing** - Extract text from images and scanned documents
+- **Audio to Text** - Transcribe audio files to markdown format
 
 ## Prerequisites
 
@@ -128,13 +110,12 @@ Or using pip:
 ```bash
 python -m venv .venv
 source .venv/bin/activate  # On macOS/Linux
-# or
-.venv\Scripts\activate  # On Windows
+# or .venv\Scripts\activate on Windows
 
-pip install fastmcp sqlalchemy requests
+pip install fastmcp sqlalchemy markitdown mcp
 ```
 
-### 3. Configure Environment Variables
+### 3. Configure Environment Variables (Optional for Database)
 
 Create a `.env` file in the root directory:
 
@@ -143,21 +124,58 @@ Create a `.env` file in the root directory:
 DB_DSN=sqlite+pysqlite:///./app.db
 DB_READONLY=1
 DB_MAX_ROWS=1000
-
-# GitHub Configuration (get your token from https://github.com/settings/tokens)
-GITHUB_TOKEN=your_github_personal_access_token
 ```
 
 **Note:** Never commit your `.env` file to git. It's already included in `.gitignore`.
 
-Load environment variables (bash/zsh):
-```bash
-export GITHUB_TOKEN=your_github_personal_access_token
-```
-
 ## Servers
 
-### 1. Database Server (`db_server/server.py`)
+### 1. Markitdown Server (`markitdown_server/server.py`)
+
+Convert documents and web pages to clean Markdown format.
+
+#### Features
+- Document conversion (PDF, DOCX, XLSX, PPTX)
+- Web page scraping and conversion
+- Image OCR (extract text from images)
+- Audio transcription
+- Batch file processing
+- 12+ supported file formats
+
+#### Tools
+- `convert_file(path)` - Convert a local file to Markdown
+- `convert_url(url)` - Convert a web page to Markdown
+- `convert_batch(paths)` - Convert multiple files at once
+- `get_supported_formats()` - List all supported file formats
+
+#### Supported Formats
+- **Documents**: PDF, DOCX, XLSX, PPTX, TXT, HTML
+- **Data**: JSON, XML
+- **Images**: JPG, PNG, GIF (with OCR)
+- **Audio**: WAV (with transcription)
+- **Web**: Any HTTP/HTTPS URL
+
+#### Usage
+```bash
+python markitdown_server/server.py
+```
+
+#### Example Usage
+```python
+# Convert a PDF document
+convert_file("/path/to/document.pdf")
+
+# Convert a webpage
+convert_url("https://example.com/article")
+
+# Batch convert multiple files
+convert_batch(["/path/to/file1.pdf", "/path/to/file2.docx"])
+
+# Check supported formats
+get_supported_formats()
+```
+
+### 2. Database Server (`db_server/server.py`)
 
 Provides safe SQLite database access with configurable read/write permissions.
 
@@ -185,37 +203,7 @@ python db_server/server.py
 - `DB_READONLY` - Enable read-only mode (default: `1`)
 - `DB_MAX_ROWS` - Maximum rows returned per query (default: `1000`)
 
-### 2. GitHub Server (`github_server/server.py`)
-
-Integrates with GitHub API to provide repository information and operations.
-
-#### Features
-- Repository information retrieval
-- Issue listing and filtering
-- Repository search
-
-#### Tools
-- `get_repo_info(owner, repo)` - Get detailed information about a repository
-- `list_issues(owner, repo, state, limit)` - List issues from a repository
-- `search_repos(query, limit)` - Search GitHub repositories
-- `create_branch(owner, repo, branch_name, from_branch)` - Create a new branch
-- `create_or_update_file(owner, repo, path, content, message, branch, sha)` - Create or update files
-- `get_file_content(owner, repo, path, branch)` - Get file content from repository
-- `create_pull_request(owner, repo, title, head, base, body)` - Create a pull request
-- `list_branches(owner, repo, limit)` - List all branches in a repository
-
-#### Usage
-```bash
-python github_server/server.py
-```
-
-#### Configuration
-- `GITHUB_TOKEN` - GitHub personal access token (optional but recommended for higher rate limits)
-
-#### Example Queries
-```python
-# Get repository info
-get_repo_info(owner="majidraza1228", repo="local-mcpserver")
+## Running the Servers
 
 # List open issues
 list_issues(owner="majidraza1228", repo="local-mcpserver", state="open", limit=20)
@@ -249,18 +237,6 @@ create_pull_request(
 
 #### Complete PR Creation Example
 
-See `example_create_pr.py` for a full workflow example that:
-1. Lists existing branches
-2. Creates a new feature branch
-3. Adds/updates files in the branch
-4. Creates a pull request
-
-Run it with:
-```bash
-export GITHUB_TOKEN=your_token
-python example_create_pr.py
-```
-
 ### 3. Markitdown Server (`markitdown_server/server.py`)
 
 Converts various document formats to markdown.
@@ -276,9 +252,18 @@ Each server runs independently using the STDIO transport protocol for MCP commun
 
 ### Prerequisites
 - Ensure virtual environment is activated
-- Set required environment variables (especially `GITHUB_TOKEN` for GitHub server)
+- Set environment variables if using database server
 
 ### Running Locally
+
+#### Markitdown Server
+```bash
+# Using full path to venv python
+/path/to/local-mcpserver/.venv/bin/python ./markitdown_server/server.py
+
+# Or if venv is activated
+python3 ./markitdown_server/server.py
+```
 
 #### Database Server
 ```bash
@@ -289,115 +274,64 @@ Each server runs independently using the STDIO transport protocol for MCP commun
 python3 ./db_server/server.py
 ```
 
-#### GitHub Server
-```bash
-# Set GitHub token first
-export GITHUB_TOKEN=your_github_personal_access_token
-
-# Run the server
-/path/to/local-mcpserver/.venv/bin/python ./github_server/server.py
-
-# Or if venv is activated
-python3 ./github_server/server.py
-```
-
-#### Markitdown Server
-```bash
-/path/to/local-mcpserver/.venv/bin/python ./markitdown_server/server.py
-```
-
 **Note:** Servers run in STDIO mode and wait for MCP protocol messages. They won't show output until they receive input from an MCP client.
 
-## Using with VS Code & GitHub Copilot (Like Copilot Chat)
+## Using with VS Code & GitHub Copilot
 
-To use these servers with VS Code and GitHub Copilot for natural language interactions, see the detailed integration guide:
+Integrate these servers with VS Code and use GitHub Copilot Chat for natural language interactions:
 
-**[📖 VS Code & GitHub Copilot Integration Guide](VSCODE_INTEGRATION.md)**
+### Quick Setup
 
-This enables you to use GitHub Copilot Chat to:
-- Create branches and PRs
-- Update files in your repository  
-- Query your database
-- Search repositories
-- And more - all through natural conversation!
+1. Configure `.vscode/settings.json` (see Quick Start section above)
+2. Restart VS Code
+3. Use Copilot Chat to interact with the servers
+
+### Example Conversations
+
+**For Markitdown:**
+```
+@workspace Convert this PDF to markdown: /path/to/document.pdf
+@workspace Extract text from this image: /path/to/image.jpg
+@workspace Convert this webpage: https://example.com
+```
+
+**For Database:**
+```
+@workspace Show me all tables in the database
+@workspace Preview the users table
+@workspace Query the database for active users
+```
 
 ## Testing the Servers
 
-### Option 1: Unit Tests (GitHub API Direct Testing)
+### Option 1: Manual Testing
 
-Test the GitHub API functionality without MCP:
-
-```bash
-# Run the API test script
-python test_github_server.py
-```
-
-This will test:
-- GitHub API authentication and rate limits
-- Repository information retrieval
-- Issue listing
-- Repository search
-
-Expected output:
-```
-============================================================
-GitHub Server Functionality Test
-============================================================
-
-Checking GitHub API rate limit...
-✓ Rate Limit: 4999/5000
-  Authenticated: Yes
-
-Testing get_repo_info...
-✓ Repository: majidraza1228/local-mcpserver
-  Description: Local MCP servers for database and GitHub integration
-```
-
-### Option 2: MCP Client Test (Full Integration Testing)
-
-Test the server through the MCP protocol:
+Test the servers manually by running them:
 
 ```bash
-# Install MCP client library (if not already installed)
-pip install mcp
+# Test Markitdown Server
+python markitdown_server/server.py
+# You should see the FastMCP startup banner
 
-# Run the MCP client test
-python test_mcp_client.py
+# Test Database Server
+python db_server/server.py
+# You should see the FastMCP startup banner
 ```
 
-This will:
-1. Start the GitHub server as a subprocess
-2. Connect via MCP protocol
-3. Test all available tools (get_repo_info, list_issues, search_repos)
-4. Display results and verify functionality
-
-Expected output:
-```
-============================================================
-Connected to GitHub MCP Server
-============================================================
-
-Available tools: 3
-  - get_repo_info: Get information about a GitHub repository
-  - list_issues: List recent issues for a GitHub repository
-  - search_repos: Search GitHub repositories
-
-Test 1: Getting repository info...
-Result: {
-  "name": "local-mcpserver",
-  "full_name": "majidraza1228/local-mcpserver",
-  ...
-}
-```
-
-### Option 3: MCP Inspector (Interactive Testing)
+### Option 2: MCP Inspector (Interactive Testing)
 
 Use the official MCP Inspector for interactive testing:
 
 ```bash
+# Test Markitdown Server
 npx @modelcontextprotocol/inspector \
   /path/to/local-mcpserver/.venv/bin/python \
-  /path/to/local-mcpserver/github_server/server.py
+  /path/to/local-mcpserver/markitdown_server/server.py
+
+# Test Database Server
+npx @modelcontextprotocol/inspector \
+  /path/to/local-mcpserver/.venv/bin/python \
+  /path/to/local-mcpserver/db_server/server.py
 ```
 
 This opens a web interface where you can:
@@ -421,12 +355,9 @@ Example client configuration (for Claude Desktop or similar):
         "DB_READONLY": "1"
       }
     },
-    "github": {
+    "markitdown": {
       "command": "/path/to/local-mcpserver/.venv/bin/python",
-      "args": ["/path/to/local-mcpserver/github_server/server.py"],
-      "env": {
-        "GITHUB_TOKEN": "your_github_personal_access_token"
-      }
+      "args": ["/path/to/local-mcpserver/markitdown_server/server.py"]
     }
   }
 }
@@ -438,14 +369,9 @@ Example client configuration (for Claude Desktop or similar):
 local-mcpserver/
 ├── db_server/
 │   └── server.py              # Database MCP server
-├── github_server/
-│   └── server.py              # GitHub API MCP server
 ├── markitdown_server/
 │   └── server.py              # Markitdown conversion server
-├── test_github_server.py      # GitHub API unit tests
-├── test_mcp_client.py         # MCP integration tests
-├── example_create_pr.py       # Example: Create PR workflow
-├── .env                       # Environment variables (not in git)
+├── .env                       # Environment variables (optional)
 ├── .gitignore                 # Git ignore file
 ├── Pipfile                    # Python dependencies (pipenv)
 ├── Pipfile.lock              # Locked dependencies
@@ -456,53 +382,15 @@ local-mcpserver/
 
 - **fastmcp** (>=2.13.1) - FastMCP framework for building MCP servers
 - **sqlalchemy** - Database toolkit and ORM
-- **requests** - HTTP library for GitHub API calls
+- **markitdown** - Document conversion library
 
 ## Security Considerations
-
-### GitHub Token Access
-
-**Important:** Your GitHub token must belong to an account that has access to the repositories you want to manage.
-
-#### Scenario 1: Using Your Own Repositories
-If you're accessing repositories owned by your account (e.g., `majidraza1228/local-mcpserver`):
-- ✅ Generate token from **your account** (majidraza1228)
-- ✅ Token will have full access to your repositories
-- ✅ Recommended approach for managing your own repos
-
-#### Scenario 2: Using Collaborator Access
-If you're using a token from account `xyz` to access `majidraza1228` repositories:
-- ⚠️ Account `xyz` must be added as a collaborator on the target repository
-- ⚠️ Repository owner (majidraza1228) must grant write/admin permissions
-- ⚠️ Go to: `https://github.com/majidraza1228/local-mcpserver/settings/access`
-- ⚠️ Add `xyz` with appropriate permissions
-
-#### Scenario 3: Organization Repositories
-If working with organization repositories:
-- 🔐 Token must have `read:org` scope
-- 🔐 Authorize token for organization at: https://github.com/settings/tokens
-- 🔐 Click "Grant" next to the organization name
-- 🔐 Verify user is a member of the organization
-
-**Testing Token Access:**
-```bash
-export GITHUB_TOKEN=your_token
-python test_github_server.py
-```
-
-If you see 404 errors, the token doesn't have access to those repositories.
 
 ### Database Server
 - Read-only mode is enabled by default (`DB_READONLY=1`)
 - Write operations (INSERT, UPDATE, DELETE, etc.) are blocked in read-only mode
 - Query results are capped to prevent memory issues
 - Use parameterized queries to prevent SQL injection
-
-### GitHub Server
-- Store your GitHub token securely in `.env` file
-- Never commit `.env` file to version control
-- Token provides authenticated access and higher rate limits
-- Respects GitHub API rate limits
 
 ## Troubleshooting
 
@@ -522,15 +410,10 @@ source .venv/bin/activate
 - Check file permissions for SQLite database file
 - Ensure SQLite driver is installed: `pip install sqlalchemy`
 
-### GitHub API Rate Limiting
-- Without authentication: 60 requests/hour
-- With authentication: 5,000 requests/hour
-- Set `GITHUB_TOKEN` environment variable with a personal access token
-
 ### Server Not Starting
 Ensure all dependencies are installed:
 ```bash
-pip install fastmcp sqlalchemy requests
+pip install fastmcp sqlalchemy markitdown
 ```
 
 ## Development
@@ -574,8 +457,9 @@ MIT License - feel free to use this code for your projects.
 
 - [FastMCP Documentation](https://gofastmcp.com)
 - [Model Context Protocol Specification](https://modelcontextprotocol.io)
-- [GitHub API Documentation](https://docs.github.com/en/rest)
 - [SQLAlchemy Documentation](https://docs.sqlalchemy.org)
+- [MarkItDown Documentation](https://github.com/microsoft/markitdown)
+- [VS Code MCP Configuration](https://modelcontextprotocol.io/clients/vscode)
 
 ## Support
 
@@ -589,5 +473,4 @@ For issues and questions:
 ### v1.0.0 (2024-11-24)
 - Initial release
 - Database server with SQLite support
-- GitHub server with repository and issue tools
-- Markitdown server for document conversion
+- Markitdown server for document conversion to Markdown
