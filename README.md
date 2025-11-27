@@ -27,8 +27,7 @@ pip install fastmcp sqlalchemy markitdown watchdog fastapi uvicorn python-multip
 
 **Then:**
 - **For AI Assistants (MCP/STDIO)** → See [MCP Setup](#mcp-setup)
-- **For API Integration (MCP/HTTP)** → See [MCP HTTP Setup](#mcp-http-setup)
-- **For Web Browser** → See [Web Setup](#web-setup)
+- **For HTTP API + Web UI** → See [HTTP Streaming Setup](#http-streaming-setup)
 - **For Automation** → See [File Watcher](#file-watcher)
 
 ---
@@ -38,9 +37,7 @@ pip install fastmcp sqlalchemy markitdown watchdog fastapi uvicorn python-multip
 | Implementation | Use Case | Protocol | Details |
 |---------------|----------|----------|---------|
 | **🤖 MCP Server (STDIO)** | AI assistants (Copilot, Claude) | MCP/STDIO | [Setup & Testing →](TESTING_MCP.md) |
-| **📡 MCP HTTP Server** | API integration, streaming | MCP/HTTP+SSE | [Complete Guide →](MCP_HTTP_GUIDE.md) |
-| **🌐 Web Server** | Browser uploads | HTTP | [Web Guide →](WEB_SERVER_GUIDE.md) |
-| **🔄 Streaming Web** | Real-time progress UI | HTTP+SSE | Port 8001 |
+| **🌐 HTTP Streaming Server** | Unified: MCP API + Web UI | HTTP+SSE | Port 8080 - All-in-one |
 | **📁 File Watcher** | Automated processing | File System | [See below](#file-watcher) |
 | **🗄️ Database Server** | SQLite access | MCP/STDIO | [Configuration](#mcp-setup) |
 
@@ -72,36 +69,85 @@ Edit `~/.config/mcp/config.json`:
 
 ---
 
-### MCP HTTP Setup
-**For API Integration with Streaming (HTTP + SSE)**
+### HTTP Streaming Setup
+**Unified Server: MCP API + Web UI + Real-time Streaming**
 
 **Start the server:**
 ```bash
-.venv/bin/python markitdown_server/mcp_http_server.py
-# Runs on http://localhost:8002
+./markitdown_server/start_http_streaming.sh
+# Runs on http://localhost:8080
 ```
 
-**Test it:**
+**✨ Features:**
+- 🌐 **Beautiful Web UI** - Drag-and-drop file uploads with real-time progress
+- 📡 **MCP Tools API** - Access all 4 MCP tools via REST endpoints
+- ⚡ **SSE Streaming** - Watch conversion progress in real-time
+- 🎨 **Tabbed Interface** - Upload tab + API documentation tab
+- 📥 **One-Click Download** - Download converted Markdown instantly
+
+**Web Interface:**
 ```bash
-# List MCP tools
-curl http://localhost:8002/mcp/tools
+# Open in browser
+open http://localhost:8080
 
-# Convert a file (JSON response)
-curl -X POST http://localhost:8002/mcp/call/convert_file \
-  -H "Content-Type: application/json" \
-  -d '{"path": "/path/to/file.pdf"}'
-
-# Convert with streaming (SSE)
-curl -N -X POST http://localhost:8002/mcp/stream/convert_file \
-  -H "Content-Type: application/json" \
-  -d '{"path": "/path/to/file.pdf"}'
-
-# Upload file with streaming
-curl -N -X POST http://localhost:8002/mcp/upload \
-  -F "file=@/path/to/file.pdf"
+# Features:
+# - Drag and drop files
+# - Real-time conversion progress bar
+# - Visual status indicators
+# - Download button for results
+# - API documentation built-in
 ```
 
-📖 **[Complete MCP HTTP Guide →](MCP_HTTP_GUIDE.md)**
+**API Usage:**
+```bash
+# List all MCP tools
+curl http://localhost:8080/api/tools
+
+# Get supported formats
+curl http://localhost:8080/api/formats
+
+# Upload file with streaming (Server-Sent Events)
+curl -N -X POST http://localhost:8080/api/stream/convert \
+  -F "file=@document.pdf"
+
+# Call MCP tool directly (JSON response)
+curl -X POST http://localhost:8080/api/call/convert_file \
+  -H "Content-Type: application/json" \
+  -d '{"path": "/path/to/file.pdf"}'
+
+# Convert URL
+curl -X POST http://localhost:8080/api/call/convert_url \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://example.com"}'
+
+# Batch conversion
+curl -X POST http://localhost:8080/api/call/convert_batch \
+  -H "Content-Type: application/json" \
+  -d '{"paths": ["/path/1.pdf", "/path/2.docx"]}'
+```
+
+**Python Example:**
+```python
+import requests
+
+# Upload with streaming
+with open('document.pdf', 'rb') as f:
+    response = requests.post(
+        'http://localhost:8080/api/stream/convert',
+        files={'file': f},
+        stream=True
+    )
+    for line in response.iter_lines():
+        if line.startswith(b'data: '):
+            print(line.decode())
+
+# Call MCP tool
+response = requests.post(
+    'http://localhost:8080/api/call/convert_file',
+    json={'path': '/path/to/file.pdf'}
+)
+print(response.json()['result'])
+```
 
 ---
 
@@ -149,11 +195,11 @@ curl -N -X POST http://localhost:8002/mcp/upload \
 **Testing MCP STDIO:**
 - 📖 [TESTING_MCP.md](TESTING_MCP.md) - MCP Inspector, VS Code Copilot, protocol testing
 
-**Testing MCP HTTP:**
-- 📖 [MCP_HTTP_GUIDE.md](MCP_HTTP_GUIDE.md) - HTTP endpoints, streaming, curl examples
-
-**Testing Web Server:**
-- 📖 [WEB_SERVER_GUIDE.md](WEB_SERVER_GUIDE.md) - HTTP endpoints, browser testing, API docs
+**Testing HTTP Streaming Server:**
+- Open http://localhost:8080 in browser
+- Test file upload via drag-and-drop
+- Test API endpoints with curl (see [HTTP Streaming Setup](#http-streaming-setup))
+- Monitor real-time streaming progress
 
 ---
 
@@ -162,11 +208,56 @@ curl -N -X POST http://localhost:8002/mcp/upload \
 **MCP STDIO Production:**
 - 📖 [TESTING_MCP.md](TESTING_MCP.md#production-deployment) - systemd, Docker, monitoring
 
-**MCP HTTP Production:**
-- 📖 [MCP_HTTP_GUIDE.md](MCP_HTTP_GUIDE.md#production-deployment) - systemd, Docker, nginx, security
+**HTTP Streaming Production:**
+```bash
+# Using systemd
+sudo nano /etc/systemd/system/markitdown-http.service
 
-**Web Production:**
-- 📖 [WEB_SERVER_GUIDE.md](WEB_SERVER_GUIDE.md#production-deployment) - nginx, SSL, scaling
+[Unit]
+Description=MarkItDown HTTP Streaming Server
+After=network.target
+
+[Service]
+Type=simple
+User=your-user
+WorkingDirectory=/path/to/local-mcpserver
+ExecStart=/path/to/.venv/bin/python markitdown_server/http_streaming_server.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
+# Start service
+sudo systemctl enable markitdown-http
+sudo systemctl start markitdown-http
+```
+
+**Using Docker:**
+```dockerfile
+FROM python:3.14-slim
+WORKDIR /app
+COPY . .
+RUN pip install fastmcp markitdown fastapi uvicorn python-multipart
+EXPOSE 8080
+CMD ["python", "markitdown_server/http_streaming_server.py"]
+```
+
+**Using nginx reverse proxy:**
+```nginx
+server {
+    listen 80;
+    server_name your-domain.com;
+    
+    location / {
+        proxy_pass http://localhost:8080;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+```
 
 ---
 
@@ -174,9 +265,11 @@ curl -N -X POST http://localhost:8002/mcp/upload \
 
 **MCP STDIO Issues:** See [TESTING_MCP.md - Troubleshooting](TESTING_MCP.md#troubleshooting)
 
-**MCP HTTP Issues:** See [MCP_HTTP_GUIDE.md - Troubleshooting](MCP_HTTP_GUIDE.md#troubleshooting)
-
-**Web Issues:** See [WEB_SERVER_GUIDE.md - Troubleshooting](WEB_SERVER_GUIDE.md#troubleshooting)
+**HTTP Streaming Issues:**
+- **Port already in use:** Change port in `http_streaming_server.py` (line: `uvicorn.run(app, host="0.0.0.0", port=8080)`)
+- **Import errors:** `source .venv/bin/activate && pip install fastmcp markitdown fastapi uvicorn python-multipart`
+- **Streaming not working:** Check browser console, ensure using `-N` flag with curl
+- **File upload fails:** Check file size limits, temp directory permissions
 
 **Quick Fixes:**
 - Import errors: `source .venv/bin/activate && pip install -r requirements.txt`
@@ -196,7 +289,7 @@ MIT License - feel free to use in your projects.
 - [Model Context Protocol](https://modelcontextprotocol.io)
 - [MarkItDown Library](https://github.com/microsoft/markitdown)
 - [MCP Implementation Guide](MCP_IMPLEMENTATION_GUIDE.md)
-- [MCP HTTP Streaming Guide](MCP_HTTP_GUIDE.md)
+- [MCP STDIO Testing Guide](TESTING_MCP.md)
 
 ---
 
@@ -204,5 +297,4 @@ MIT License - feel free to use in your projects.
 
 - Open an issue on [GitHub](https://github.com/majidraza1228/local-mcpserver/issues)
 - Check [TESTING_MCP.md](TESTING_MCP.md) for MCP STDIO help
-- Check [MCP_HTTP_GUIDE.md](MCP_HTTP_GUIDE.md) for MCP HTTP help
-- Check [WEB_SERVER_GUIDE.md](WEB_SERVER_GUIDE.md) for web server help
+- Check [HTTP Streaming Setup](#http-streaming-setup) for HTTP API help
