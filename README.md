@@ -14,7 +14,22 @@ Convert documents to Markdown using **MCP protocol** for AI assistants or **Web 
 
 ## 🚀 Quick Start
 
-**Choose your implementation:**
+### Automated Setup (Recommended)
+
+```bash
+# Clone and run setup script
+git clone https://github.com/majidraza1228/local-mcpserver.git
+cd local-mcpserver
+./setup-local.sh
+
+# That's it! Script will:
+# ✓ Create virtual environment
+# ✓ Install dependencies
+# ✓ Configure MCP for VS Code
+# ✓ Test installation
+```
+
+### Manual Setup
 
 ```bash
 # Clone and install
@@ -22,11 +37,11 @@ git clone https://github.com/majidraza1228/local-mcpserver.git
 cd local-mcpserver
 python -m venv .venv
 source .venv/bin/activate
-pip install fastmcp sqlalchemy markitdown watchdog fastapi uvicorn python-multipart
+pip install -r requirements.txt
 ```
 
-**Then:**
-- **For AI Assistants (MCP/STDIO)** → See [MCP Setup](#mcp-setup)
+**Then choose your mode:**
+- **For AI Assistants (MCP/STDIO)** → [Quick Setup Guide](LOCAL_SETUP_GUIDE.md)
 - **For HTTP API + Web UI** → See [HTTP Streaming Setup](#http-streaming-setup)
 - **For Automation** → See [File Watcher](#file-watcher)
 
@@ -285,7 +300,8 @@ MIT License - feel free to use in your projects.
 
 ## 📖 Resources
 
-- [Developer Guide - Local to OpenShift](DEVELOPER_GUIDE.md) ⭐
+- [🚀 Quick Setup Guide - Get Started Fast!](LOCAL_SETUP_GUIDE.md) ⭐
+- [Developer Guide - Local to OpenShift](DEVELOPER_GUIDE.md)
 - [FastMCP Documentation](https://gofastmcp.com)
 - [Model Context Protocol](https://modelcontextprotocol.io)
 - [MarkItDown Library](https://github.com/microsoft/markitdown)

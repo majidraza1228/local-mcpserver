@@ -1,0 +1,20 @@
+{
+  "version": "1.0",
+  "servers": {
+    "markitdown": {
+      "command": "/REPLACE/WITH/YOUR/PATH/local-mcpserver/.venv/bin/python",
+      "args": ["./markitdown_server/server.py"],
+      "cwd": "/REPLACE/WITH/YOUR/PATH/local-mcpserver",
+      "description": "Convert documents (PDF, DOCX, XLSX, etc.) to Markdown"
+    },
+    "database": {
+      "command": "/REPLACE/WITH/YOUR/PATH/local-mcpserver/.venv/bin/python",
+      "args": ["./db_server/server.py"],
+      "cwd": "/REPLACE/WITH/YOUR/PATH/local-mcpserver",
+      "env": {
+        "DB_PATH": "/REPLACE/WITH/YOUR/DATABASE/PATH/database.db"
+      },
+      "description": "Query SQLite databases safely"
+    }
+  }
+}
