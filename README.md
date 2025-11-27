@@ -26,7 +26,8 @@ pip install fastmcp sqlalchemy markitdown watchdog fastapi uvicorn python-multip
 ```
 
 **Then:**
-- **For AI Assistants (MCP)** → See [MCP Setup](#mcp-setup)
+- **For AI Assistants (MCP/STDIO)** → See [MCP Setup](#mcp-setup)
+- **For API Integration (MCP/HTTP)** → See [MCP HTTP Setup](#mcp-http-setup)
 - **For Web Browser** → See [Web Setup](#web-setup)
 - **For Automation** → See [File Watcher](#file-watcher)
 
@@ -34,12 +35,14 @@ pip install fastmcp sqlalchemy markitdown watchdog fastapi uvicorn python-multip
 
 ## 📦 What's Inside
 
-| Implementation | Use Case | Details |
-|---------------|----------|----------|
-| **🤖 MCP Server** | AI assistants (Copilot, Claude) | [Setup & Testing →](TESTING_MCP.md) |
-| **🌐 Web Server** | Browser uploads, REST API | [Setup & Testing →](WEB_SERVER_GUIDE.md) |
-| **📁 File Watcher** | Automated batch processing | [See below](#file-watcher) |
-| **🗄️ Database Server** | SQLite access via MCP | [Configuration](#mcp-setup) |
+| Implementation | Use Case | Protocol | Details |
+|---------------|----------|----------|---------|
+| **🤖 MCP Server (STDIO)** | AI assistants (Copilot, Claude) | MCP/STDIO | [Setup & Testing →](TESTING_MCP.md) |
+| **📡 MCP HTTP Server** | API integration, streaming | MCP/HTTP+SSE | [Complete Guide →](MCP_HTTP_GUIDE.md) |
+| **🌐 Web Server** | Browser uploads | HTTP | [Web Guide →](WEB_SERVER_GUIDE.md) |
+| **🔄 Streaming Web** | Real-time progress UI | HTTP+SSE | Port 8001 |
+| **📁 File Watcher** | Automated processing | File System | [See below](#file-watcher) |
+| **🗄️ Database Server** | SQLite access | MCP/STDIO | [Configuration](#mcp-setup) |
 
 **Supported Formats:** PDF, DOCX, XLSX, PPTX, HTML, TXT, JSON, XML, Images (JPG, PNG, GIF), Audio (WAV)
 
@@ -47,7 +50,7 @@ pip install fastmcp sqlalchemy markitdown watchdog fastapi uvicorn python-multip
 
 ## 🔧 Setup
 
-### MCP Setup
+### MCP Setup (STDIO)
 **For AI Assistants (VS Code Copilot, Claude Desktop)**
 
 Edit `~/.config/mcp/config.json`:
@@ -65,7 +68,40 @@ Edit `~/.config/mcp/config.json`:
 ```
 **Restart VS Code** and use: `@workspace Convert file.pdf to markdown`
 
-📖 **[Complete MCP Guide →](TESTING_MCP.md)**
+📖 **[Complete MCP STDIO Guide →](TESTING_MCP.md)**
+
+---
+
+### MCP HTTP Setup
+**For API Integration with Streaming (HTTP + SSE)**
+
+**Start the server:**
+```bash
+.venv/bin/python markitdown_server/mcp_http_server.py
+# Runs on http://localhost:8002
+```
+
+**Test it:**
+```bash
+# List MCP tools
+curl http://localhost:8002/mcp/tools
+
+# Convert a file (JSON response)
+curl -X POST http://localhost:8002/mcp/call/convert_file \
+  -H "Content-Type: application/json" \
+  -d '{"path": "/path/to/file.pdf"}'
+
+# Convert with streaming (SSE)
+curl -N -X POST http://localhost:8002/mcp/stream/convert_file \
+  -H "Content-Type: application/json" \
+  -d '{"path": "/path/to/file.pdf"}'
+
+# Upload file with streaming
+curl -N -X POST http://localhost:8002/mcp/upload \
+  -F "file=@/path/to/file.pdf"
+```
+
+📖 **[Complete MCP HTTP Guide →](MCP_HTTP_GUIDE.md)**
 
 ---
 
@@ -78,6 +114,16 @@ Edit `~/.config/mcp/config.json`:
 ```
 
 📖 **[Complete Web Guide →](WEB_SERVER_GUIDE.md)**
+
+---
+
+### Streaming Web Setup
+**For Real-time Progress UI**
+
+```bash
+./markitdown_server/start_streaming.sh
+# Open http://localhost:8001
+```
 
 ---
 
@@ -100,8 +146,11 @@ Edit `~/.config/mcp/config.json`:
 
 ### Detailed Testing
 
-**Testing MCP Implementation:**
+**Testing MCP STDIO:**
 - 📖 [TESTING_MCP.md](TESTING_MCP.md) - MCP Inspector, VS Code Copilot, protocol testing
+
+**Testing MCP HTTP:**
+- 📖 [MCP_HTTP_GUIDE.md](MCP_HTTP_GUIDE.md) - HTTP endpoints, streaming, curl examples
 
 **Testing Web Server:**
 - 📖 [WEB_SERVER_GUIDE.md](WEB_SERVER_GUIDE.md) - HTTP endpoints, browser testing, API docs
@@ -110,8 +159,11 @@ Edit `~/.config/mcp/config.json`:
 
 ## 🚀 Production Deployment
 
-**MCP Production:**
+**MCP STDIO Production:**
 - 📖 [TESTING_MCP.md](TESTING_MCP.md#production-deployment) - systemd, Docker, monitoring
+
+**MCP HTTP Production:**
+- 📖 [MCP_HTTP_GUIDE.md](MCP_HTTP_GUIDE.md#production-deployment) - systemd, Docker, nginx, security
 
 **Web Production:**
 - 📖 [WEB_SERVER_GUIDE.md](WEB_SERVER_GUIDE.md#production-deployment) - nginx, SSL, scaling
@@ -120,7 +172,9 @@ Edit `~/.config/mcp/config.json`:
 
 ## 🔧 Troubleshooting
 
-**MCP Issues:** See [TESTING_MCP.md - Troubleshooting](TESTING_MCP.md#troubleshooting)
+**MCP STDIO Issues:** See [TESTING_MCP.md - Troubleshooting](TESTING_MCP.md#troubleshooting)
+
+**MCP HTTP Issues:** See [MCP_HTTP_GUIDE.md - Troubleshooting](MCP_HTTP_GUIDE.md#troubleshooting)
 
 **Web Issues:** See [WEB_SERVER_GUIDE.md - Troubleshooting](WEB_SERVER_GUIDE.md#troubleshooting)
 
@@ -142,11 +196,13 @@ MIT License - feel free to use in your projects.
 - [Model Context Protocol](https://modelcontextprotocol.io)
 - [MarkItDown Library](https://github.com/microsoft/markitdown)
 - [MCP Implementation Guide](MCP_IMPLEMENTATION_GUIDE.md)
+- [MCP HTTP Streaming Guide](MCP_HTTP_GUIDE.md)
 
 ---
 
 ## 📞 Support
 
 - Open an issue on [GitHub](https://github.com/majidraza1228/local-mcpserver/issues)
-- Check [TESTING_MCP.md](TESTING_MCP.md) for MCP help
+- Check [TESTING_MCP.md](TESTING_MCP.md) for MCP STDIO help
+- Check [MCP_HTTP_GUIDE.md](MCP_HTTP_GUIDE.md) for MCP HTTP help
 - Check [WEB_SERVER_GUIDE.md](WEB_SERVER_GUIDE.md) for web server help
