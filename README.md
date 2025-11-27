@@ -7,8 +7,11 @@ Convert documents to Markdown using **MCP protocol** for AI assistants or **Web 
 ## 🎯 What You Get
 
 - **📄 MarkItDown Conversion** - Convert PDF, DOCX, XLSX, PPTX, images, and more to Markdown
+- **🤖 AI Assistant Integration** - Let Copilot/Claude convert files automatically via MCP
 - **🗄️ Database Access** - Safe SQLite queries through MCP
-- **3 Modes** - MCP server, Web UI, or File watcher
+- **Multiple Interfaces** - MCP STDIO, HTTP API, Web UI, or File watcher
+
+**New to MCP?** → [Understanding MCP - Start Here!](UNDERSTANDING_MCP.md) 🌟
 
 ---
 
@@ -41,6 +44,7 @@ pip install -r requirements.txt
 ```
 
 **Then choose your mode:**
+- **New to MCP?** → [Understanding MCP Guide](UNDERSTANDING_MCP.md) 🌟
 - **For AI Assistants (MCP/STDIO)** → [Quick Setup Guide](LOCAL_SETUP_GUIDE.md)
 - **For HTTP API + Web UI** → See [HTTP Streaming Setup](#http-streaming-setup)
 - **For Automation** → See [File Watcher](#file-watcher)
@@ -300,18 +304,26 @@ MIT License - feel free to use in your projects.
 
 ## 📖 Resources
 
-- [🚀 Quick Setup Guide - Get Started Fast!](LOCAL_SETUP_GUIDE.md) ⭐
+### Getting Started
+- [🌟 Understanding MCP - What is MCP and Why Use It?](UNDERSTANDING_MCP.md) ⭐ **START HERE**
+- [🚀 Quick Setup Guide - Get Started Fast!](LOCAL_SETUP_GUIDE.md)
+- [🧪 Testing MCP - Test Your Setup](TESTING_MCP.md)
+
+### Advanced
 - [Developer Guide - Local to OpenShift](DEVELOPER_GUIDE.md)
+- [MCP Implementation Guide](MCP_IMPLEMENTATION_GUIDE.md)
+
+### External Documentation
 - [FastMCP Documentation](https://gofastmcp.com)
 - [Model Context Protocol](https://modelcontextprotocol.io)
 - [MarkItDown Library](https://github.com/microsoft/markitdown)
-- [MCP Implementation Guide](MCP_IMPLEMENTATION_GUIDE.md)
-- [MCP STDIO Testing Guide](TESTING_MCP.md)
 
 ---
 
 ## 📞 Support
 
-- Open an issue on [GitHub](https://github.com/majidraza1228/local-mcpserver/issues)
-- Check [TESTING_MCP.md](TESTING_MCP.md) for MCP STDIO help
-- Check [HTTP Streaming Setup](#http-streaming-setup) for HTTP API help
+- **New to MCP?** Read [Understanding MCP](UNDERSTANDING_MCP.md) first
+- **Setup Issues?** Check [LOCAL_SETUP_GUIDE.md](LOCAL_SETUP_GUIDE.md)
+- **Testing Issues?** Check [TESTING_MCP.md](TESTING_MCP.md)
+- **HTTP API Help?** See [HTTP Streaming Setup](#http-streaming-setup)
+- **General Help?** Open an issue on [GitHub](https://github.com/majidraza1228/local-mcpserver/issues)
