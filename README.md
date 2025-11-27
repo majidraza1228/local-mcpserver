@@ -285,6 +285,7 @@ MIT License - feel free to use in your projects.
 
 ## 📖 Resources
 
+- [Developer Guide - Local to OpenShift](DEVELOPER_GUIDE.md) ⭐
 - [FastMCP Documentation](https://gofastmcp.com)
 - [Model Context Protocol](https://modelcontextprotocol.io)
 - [MarkItDown Library](https://github.com/microsoft/markitdown)

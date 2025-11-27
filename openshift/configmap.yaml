@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: markitdown-config
+  labels:
+    app: markitdown-mcp
+data:
+  LOG_LEVEL: "INFO"
+  MAX_FILE_SIZE: "10485760"  # 10MB in bytes
+  ALLOWED_ORIGINS: "*"
+  UPLOAD_DIR: "/tmp/uploads"
