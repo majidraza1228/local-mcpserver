@@ -237,14 +237,118 @@ create_pull_request(
 
 #### Complete PR Creation Example
 
-### 3. Markitdown Server (`markitdown_server/server.py`)
+### 3. Markitdown Service
 
-Converts various document formats to markdown.
+Converts various document formats to markdown. Available in **three implementations**:
 
-#### Usage
+- ✅ **MCP Server** (`server.py`) - Model Context Protocol implementation for AI assistants
+- ❌ **Web Server** (`web_server.py`) - FastAPI HTTP server with browser UI (NOT MCP)
+- ❌ **File Watcher** (`watcher_service.py`) - Automated file monitoring service (NOT MCP)
+
+> **Note:** Only `server.py` implements the MCP protocol. The web and watcher services are alternative interfaces to the same MarkItDown conversion functionality.
+
+---
+
+---
+
+#### A. MCP Server Mode ✅ (AI Assistant Integration)
+
+**File:** `markitdown_server/server.py`
+
+**MCP Implementation:** Uses FastMCP framework with MCP protocol (STDIO transport)
+
+**Exposes MCP Tools:**
+- `convert_file(path)` - Convert local files
+- `convert_url(url)` - Convert web pages  
+- `convert_batch(paths)` - Batch conversion
+- `get_supported_formats()` - List supported formats
+
+**Usage:**
 ```bash
 python markitdown_server/server.py
 ```
+
+**Integration:**
+- VS Code with GitHub Copilot Chat: `@workspace Convert file.pdf to markdown`
+- Claude Desktop with MCP
+- Any MCP-compatible client
+
+**Why it's MCP:**
+```python
+from fastmcp import FastMCP  # ← MCP framework
+app = FastMCP(name="markitdown", ...)
+@app.tool()  # ← MCP tool decorator
+```
+
+---
+
+#### B. Web Interface Mode ❌ (Browser Upload - NOT MCP)
+
+**File:** `markitdown_server/web_server.py`
+
+**Implementation:** Regular FastAPI HTTP server (NO MCP protocol)
+
+Beautiful web UI for uploading and converting files:
+
+```bash
+# Start the web server
+./markitdown_server/start_web.sh
+
+# Or run directly
+python markitdown_server/web_server.py
+```
+
+Then open http://localhost:8000 in your browser and drag & drop files to convert!
+
+**Features:**
+- 🎨 Beautiful drag-and-drop interface
+- 📤 Upload files through browser
+- 📥 Download converted Markdown files
+- 🔄 Real-time conversion status
+- 📊 REST API endpoints available
+
+**Why it's NOT MCP:**
+```python
+from fastapi import FastAPI  # ← Regular FastAPI, not FastMCP
+app = FastAPI(...)
+@app.post("/convert")  # ← HTTP endpoint, not MCP tool
+```
+
+---
+
+#### C. File Watcher Service Mode ❌ (Auto-Convert - NOT MCP)
+
+**File:** `markitdown_server/watcher_service.py`
+
+**Implementation:** Standalone file system monitoring service (NO MCP protocol)
+
+Automatically converts documents dropped into a watched folder:
+
+```bash
+# Start the watcher service
+./markitdown_server/start_watcher.sh
+
+# Or run directly
+python markitdown_server/watcher_service.py
+```
+
+**How it works:**
+1. Drop files into: `/Users/syedraza/Documents/markitdown`
+2. Service automatically converts them to Markdown
+3. Converted files saved to: `/Users/syedraza/Documents/markitdown/converted`
+4. Original files moved to: `/Users/syedraza/Documents/markitdown/processed`
+
+**Why it's NOT MCP:**
+```python
+from watchdog.observers import Observer  # ← File system watcher, not MCP
+class MarkItDownHandler(FileSystemEventHandler):  # ← Event handler, not MCP tool
+```
+
+---
+
+**Supported formats (all modes):** PDF, DOCX, XLSX, PPTX, HTML, TXT, JSON, XML, JPG, PNG, GIF, WAV
+
+> **📖 For detailed comparison, see:** [MCP_IMPLEMENTATION_GUIDE.md](MCP_IMPLEMENTATION_GUIDE.md)
 
 ## Running the Servers
 
